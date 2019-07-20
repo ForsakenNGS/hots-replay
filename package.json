@@ -1,0 +1,31 @@
+{
+  "name": "hots-replay",
+  "version": "1.0.0",
+  "description": "Process replays from blizzards heroes of the storm",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForsakenNGS/hots-replay.git"
+  },
+  "keywords": [
+    "blizzard",
+    "hots",
+    "replay",
+    "heroes",
+    "of",
+    "the",
+    "storm"
+  ],
+  "author": "Jens N",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ForsakenNGS/hots-replay/issues"
+  },
+  "homepage": "https://github.com/ForsakenNGS/hots-replay#readme",
+  "dependencies": {
+    "mpq-file": "file:../mpq-file"
+  }
+}
