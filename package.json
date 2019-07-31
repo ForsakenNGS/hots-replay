@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/ForsakenNGS/hots-replay#readme",
   "dependencies": {
-    "mpq-file": "^1.0.1"
+    "mpq-file": "^1.0.1",
+    "seek-bzip": "^1.0.5"
   }
 }
