@@ -1,6 +1,6 @@
 {
   "name": "hots-replay",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Process replays from blizzards heroes of the storm",
   "main": "index.js",
   "scripts": {
@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/ForsakenNGS/hots-replay#readme",
   "dependencies": {
-    "mpq-file": "^1.0.1",
+    "mpq-file": "^1.0.2",
     "seek-bzip": "^1.0.5"
   }
 }

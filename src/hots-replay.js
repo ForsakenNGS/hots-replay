@@ -11,6 +11,7 @@ class HotsReplay extends MpqFile {
         this.replayHeader = HotsDecoder.decode_versioned(this.bufferMpq, "replay_header_typeid");
         this.replayDetails = null;
         this.replayDataInit = null;
+        this.replayBattleLobby = null;
         this.replayGameEvents = null;
         this.replayMessageEvents = null;
         this.replayTrackerEvents = null;
@@ -29,6 +30,31 @@ class HotsReplay extends MpqFile {
             this.replayDataInit = HotsDecoder.decode_bitPacked(this.openFile("replay.initData").readFile(), "replay_initdata_typeid");
         }
         return this.replayDataInit;
+    }
+
+    getBattleLobby() {
+        if (this.replayBattleLobby === null) {
+            let battlelobby = this.openFile("replay.server.battlelobby").readFile();
+            let replayDetails = this.getReplayDetails();
+            this.replayBattleLobby = {
+                battleTags: []
+            };
+            try {
+                for (let i = 0; i < replayDetails.m_playerList.length; i++) {
+                    battlelobby.seekToString(replayDetails.m_playerList[i].m_name);
+                    this.replayBattleLobby.battleTags.push({
+                        playerIndex: i,
+                        playerName: replayDetails.m_playerList[i].m_name,
+                        tag: battlelobby.readString()
+                    });
+                }
+            } catch (error) {
+                // Failed to read all battle tags
+                console.error("Failed to read all battle tags!")
+                console.error(error);
+            }
+        }
+        return this.replayBattleLobby;
     }
 
     getReplayGameEvents() {
