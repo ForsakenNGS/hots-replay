@@ -32,7 +32,7 @@ class HotsReplay extends MpqFile {
         return this.replayDataInit;
     }
 
-    getBattleLobby() {
+    getReplayBattleLobby() {
         if (this.replayBattleLobby === null) {
             let battlelobby = this.openFile("replay.server.battlelobby").readFile();
             let replayDetails = this.getReplayDetails();
