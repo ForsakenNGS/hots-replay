@@ -3,18 +3,23 @@ const HotsPythonParser = require("./hots-python-parser.js");
 
 const heroprotocolParser = new HotsPythonParser(path.resolve(__dirname, "..", "data", "heroprotocol.py"));
 const heroprotocolData = heroprotocolParser.toJson();
+const customData = require("../data/custom");
 
 class HotsDecoder {
 
     static getHeroprotocolTypeInfo(type) {
-        return heroprotocolData.typeinfos[type];
+        if (typeof heroprotocolData.typeinfos[type] !== "undefined") {
+            return heroprotocolData.typeinfos[type];
+        } else {
+            return customData.typeinfos[type];
+        }
     }
 
     static getHeroprotocolValue(name) {
         if (heroprotocolData.hasOwnProperty(name)) {
             return heroprotocolData[name];
         } else {
-            return null;
+            return name;
         }
     }
 
