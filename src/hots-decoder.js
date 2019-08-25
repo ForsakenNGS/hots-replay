@@ -23,6 +23,15 @@ class HotsDecoder {
         }
     }
 
+    static getMapValue(map, name) {
+        for (let i = 0; i < map.length; i++) {
+            if (map[i].m_key === name) {
+                return map[i].m_value;
+            }
+        }
+        return null;
+    }
+
     /**
      * BitPacked Decoder
      * @param {MpqBuffer} buffer
@@ -111,6 +120,9 @@ class HotsDecoder {
             type = HotsDecoder.getHeroprotocolValue(type);
         }
         let typeInfo = HotsDecoder.getHeroprotocolTypeInfo(type);
+        if (!HotsDecoder.hasOwnProperty("decode_versioned"+typeInfo[0])) {
+            throw new Error("Required decode function not implemented: decode_versioned"+typeInfo[0]);
+        }
         return HotsDecoder["decode_versioned"+typeInfo[0]].call(null, buffer, ...typeInfo[1]);
     }
 
@@ -155,6 +167,19 @@ class HotsDecoder {
         return buffer.readBlob(length).toString();
     }
 
+    static decode_versioned_choice(buffer, bounds, fields) {
+        HotsDecoder.decode_versioned_expect_skip(buffer, 3);
+        let tag = HotsDecoder.decode_versioned_vint(buffer);
+        if (!fields.hasOwnProperty(tag)) {
+            HotsDecoder.decode_versioned_skip_instance(buffer);
+            return {};
+        }
+        let [fieldName, fieldType] = fields[tag];
+        let result = {};
+        result[fieldName] = HotsDecoder.decode_versioned(buffer, fieldType);
+        return result;
+    }
+
     static decode_versioned_optional(buffer, typeId) {
         HotsDecoder.decode_versioned_expect_skip(buffer, 4);
         let exists = (buffer.readBits(8) !== 0);
@@ -180,7 +205,7 @@ class HotsDecoder {
             let field = fields[i];
             if (parseInt(field[2]) === tag) {
                 if (field[0] === "__parent") {
-                    parent = HotsDecoder.decode_versioned(buffer, field[1]);
+                    let parent = HotsDecoder.decode_versioned(buffer, field[1]);
                     if (typeof parent === "object") {
                         Object.assign(result, parent);
                     } else if (fields.length === 1) {
@@ -255,6 +280,46 @@ class HotsDecoder {
                 break;
             }
         }
+    }
+
+    /**
+     * @param {MpqBuffer} buffer
+     * @param {string} eventTypeId
+     * @param {string} eventTypes
+     * @param {string|null} userId
+     */
+    static decode_event_stream(buffer, eventTypeId, eventTypes, decodeUserId = true, catchTruncatedRead = true) {
+        let events = [];
+        let eventTypeList = this.getHeroprotocolValue(eventTypes);
+        let gameloop = 0;
+        while (!buffer.done()) {
+            try {
+                let startBits = buffer.used;
+                let delta = this.decode_versioned(buffer, "svaruint32_typeid").m_uint6;
+                let userId = null;
+                gameloop += delta;
+                if (decodeUserId) {
+                    userId = this.decode_versioned(buffer, "replay_userid_typeid");
+                }
+                let eventId = this.decode_versioned(buffer, eventTypeId);
+                let [typeId, typeName] = eventTypeList[eventId];
+                let eventDetail = this.decode_versioned(buffer, typeId);
+                eventDetail['_event'] = typeName;
+                eventDetail['_eventid'] = eventId;
+                eventDetail['_gameloop'] = gameloop;
+                eventDetail['_userid'] = userId;
+                buffer.alignToByte();
+                eventDetail['_bits'] = buffer.used - startBits;
+                events.push(eventDetail);
+            } catch (error) {
+                if (catchTruncatedRead && (error.message == "Truncated read!")) {
+                    break;
+                } else {
+                    throw error;
+                }
+            }
+        }
+        return events;
     }
 
 }

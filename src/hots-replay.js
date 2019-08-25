@@ -5,6 +5,14 @@ const HotsDecoder = require('./hots-decoder.js');
 
 class HotsReplay extends MpqFile {
 
+    static get Decoder() {
+        return HotsDecoder;
+    }
+
+    static get Buffer() {
+        return MpqBuffer;
+    }
+
     constructor(file) {
         super(file);
         this.bufferMpq = new MpqBuffer(this.buffer, 16);
@@ -75,8 +83,10 @@ class HotsReplay extends MpqFile {
 
     getReplayTrackerEvents() {
         if (this.replayTrackerEvents === null) {
-            throw new Error("Not yet implemented!");
-            //this.replayTrackerEvents = HotsDecoder.decode_bitPacked(this.openFile("replay.game.events").readFile(), "replay_initdata_typeid");
+            this.replayTrackerEvents = HotsDecoder.decode_event_stream(
+              this.openFile("replay.tracker.events").readFile(),
+              "tracker_eventid_typeid", "tracker_event_types", false
+            );
         }
         return this.replayTrackerEvents;
     }

@@ -1,6 +1,6 @@
 {
   "name": "hots-replay",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Process replays from blizzards heroes of the storm",
   "main": "index.js",
   "scripts": {
